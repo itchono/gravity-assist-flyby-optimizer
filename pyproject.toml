@@ -1,0 +1,18 @@
+[project]
+name = "flyby"
+version = "0.0.1"
+authors = [
+  { name="Mingde Yin", email="mingdeyin@gmail.com" },
+]
+description = "A small example package"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/itchono/gravity-assist-flyby-optimizers"
