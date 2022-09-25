@@ -1,6 +1,6 @@
 from flyby.orbit_models.keplerian_orbit import KeplerianOrbit
 from flyby.solar_system_model.celestial_body import CelestialBody
-from flyby.solar_system_model.read_jpl_ephemeris import de440
+from flyby.solar_system_model.jpl_ephemeris import de440
 
 
 def test_earth_orbit():

@@ -1,32 +1,34 @@
 from .celestial_body import CelestialBody
 
 
-class RelationalTreeNode:
-    def __init__(self) -> None:
+class RelationalTreeNode(CelestialBody):
+    def __init__(self, body: CelestialBody) -> None:
+        super().__init__(body.name, body.radius, body.mass, body.color, body.ephemeris_id)
         self.parent: RelationalTreeNode = None
         self.children: list[RelationalTreeNode] = []
-        self.data: CelestialBody = None
+
+    def add_child_body(self, child_body: CelestialBody) -> None:
+        child = RelationalTreeNode(child_body)
+        child.parent = self
+        self.children.append(child)
 
 
 class RelationalTree:
-    def __init__(self) -> None:
-        self.root: RelationalTreeNode = RelationalTreeNode()
+    def __init__(self, root_body: CelestialBody) -> None:
+        self.root: RelationalTreeNode = RelationalTreeNode(root_body)
+
+    def add_child_body(self, child_body: CelestialBody) -> None:
+        self.root.add_child_body(child_body)
 
     @classmethod
     def solar_system(cls):
-        tree = cls()
-        tree.root.data = CelestialBody.sun()
-        tree.root.children = [RelationalTreeNode() for i in range(8)]
-        tree.root.children[0].data = CelestialBody.mercury()
-        tree.root.children[1].data = CelestialBody.venus()
-        tree.root.children[2].data = CelestialBody.earth()
-        tree.root.children[3].data = CelestialBody.mars()
-        tree.root.children[4].data = CelestialBody.jupiter()
-        tree.root.children[5].data = CelestialBody.saturn()
-        tree.root.children[6].data = CelestialBody.uranus()
-        tree.root.children[7].data = CelestialBody.neptune()
-
-        for i in range(8):
-            tree.root.children[i].parent = tree.root
-
+        tree = cls(CelestialBody.sun())
+        tree.add_child_body(CelestialBody.mercury())
+        tree.add_child_body(CelestialBody.venus())
+        tree.add_child_body(CelestialBody.earth())
+        tree.add_child_body(CelestialBody.mars())
+        tree.add_child_body(CelestialBody.jupiter())
+        tree.add_child_body(CelestialBody.saturn())
+        tree.add_child_body(CelestialBody.uranus())
+        tree.add_child_body(CelestialBody.neptune())
         return tree

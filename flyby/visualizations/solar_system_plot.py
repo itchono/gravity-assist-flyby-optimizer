@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from flyby.solar_system_model.celestial_body import CelestialBody
-from flyby.solar_system_model.read_jpl_ephemeris import de440
+from flyby.solar_system_model.jpl_ephemeris import de440
 from flyby.orbit_models.keplerian_orbit import KeplerianOrbit
 from flyby.time_model.julian_day import datetime64_to_jd
 from flyby.solar_system_model.relational_tree import RelationalTree
@@ -20,11 +20,11 @@ plt.plot(0, 0, 'yo', markersize=5)
 
 # Plot the planets
 for i in range(8):
-    planet: CelestialBody = solar_system.root.children[i].data
+    planet: CelestialBody = solar_system.root.children[i]
     r, v = de440[0, planet.ephemeris_id].compute_and_differentiate(jd)
 
     orbit = KeplerianOrbit.from_state(
-        r*1e3, v*1e3/86400, solar_system.root.data.mu)
+        r*1e3, v*1e3/86400, solar_system.root.mu)
 
     orbit_r = orbit.get_state_space_orbit(200) / 1e3
 
