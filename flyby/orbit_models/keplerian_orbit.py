@@ -13,6 +13,85 @@ class KeplerianOrbit:
     def __str__(self) -> str:
         return f'KeplerianOrbit(a={self.a}, e={self.e}, i={self.i}, raan={self.raan}, arg_perigee={self.arg_perigee})'
 
+    def get_state_space_point(self, nu: float) -> np.ndarray:
+        '''
+        Return a point in state space corresponding to a certain true anomaly.
+
+        Parameters
+        ----------
+        nu: float
+            True anomaly in radians
+
+        Returns
+        -------
+        np.ndarray
+            A 3x1 array of the position in state space.
+        '''
+        e = self.e
+        a = self.a
+        i = self.i
+        raan = self.raan
+        arg_perigee = self.arg_perigee
+
+        # Calculate the radius
+        r = a*(1-e**2)/(1+e*np.cos(nu))
+
+        # Calculate the position in the perifocal frame
+        rp = r*np.vstack((np.cos(nu), np.sin(nu), np.zeros(len(nu))))
+
+        # Transform to inertial frame
+        C = np.array([
+            [np.cos(raan)*np.cos(arg_perigee)-np.sin(raan)*np.sin(arg_perigee)*np.cos(i), -np.cos(raan)
+             * np.sin(arg_perigee)-np.sin(raan)*np.cos(arg_perigee)*np.cos(i), np.sin(raan)*np.sin(i)],
+            [np.sin(raan)*np.cos(arg_perigee)+np.cos(raan)*np.sin(arg_perigee)*np.cos(i), -np.sin(raan)
+             * np.sin(arg_perigee)+np.cos(raan)*np.cos(arg_perigee)*np.cos(i), -np.cos(raan)*np.sin(i)],
+            [np.sin(arg_perigee)*np.sin(i),
+             np.cos(arg_perigee)*np.sin(i), np.cos(i)]
+        ])
+
+        return C @ rp
+
+    def get_state_space_velocity(self, nu: float, mu: float) -> np.ndarray:
+        '''
+        Return a velocity in state space corresponding to a certain true anomaly.
+
+        Parameters
+        ----------
+        nu: float
+            True anomaly in radians
+        mu: float
+            Gravitational parameter of the central body in m^3/s^2
+
+        Returns
+        -------
+        np.ndarray
+            A 3x1 array of the velocity in state space.
+        '''
+        e = self.e
+        a = self.a
+        i = self.i
+        raan = self.raan
+        arg_perigee = self.arg_perigee
+
+        # Calculate the magnitude of the velocity
+        v_partial = np.sqrt(mu/(a*(1 - e**2)))
+
+        # Calculate the velocity in the perifocal frame
+        vp = v_partial * \
+            np.vstack((-np.sin(nu), e+np.cos(nu), np.zeros(len(nu))))
+
+        # Transform to inertial frame
+        C = np.array([
+            [np.cos(raan)*np.cos(arg_perigee)-np.sin(raan)*np.sin(arg_perigee)*np.cos(i), -np.cos(raan)
+             * np.sin(arg_perigee)-np.sin(raan)*np.cos(arg_perigee)*np.cos(i), np.sin(raan)*np.sin(i)],
+            [np.sin(raan)*np.cos(arg_perigee)+np.cos(raan)*np.sin(arg_perigee)*np.cos(i), -np.sin(raan)
+             * np.sin(arg_perigee)+np.cos(raan)*np.cos(arg_perigee)*np.cos(i), -np.cos(raan)*np.sin(i)],
+            [np.sin(arg_perigee)*np.sin(i),
+             np.cos(arg_perigee)*np.sin(i), np.cos(i)]
+        ])
+
+        return C @ vp
+
     def get_state_space_orbit(self, n: float) -> np.ndarray:
         """
         Returns a set of positions in state space for the orbit.
@@ -28,32 +107,7 @@ class KeplerianOrbit:
             A 3xN array of positions in state space.
 
         """
-        e = self.e
-        a = self.a
-        i = self.i
-        raan = self.raan
-        arg_perigee = self.arg_perigee
-
-        # Generate true anomalies around the entire orbit
-        nu = np.linspace(0, 2*np.pi, n)
-
-        # Calculate the radius
-        r = a*(1-e**2)/(1+e*np.cos(nu))
-
-        # Calculate the position in the perifocal frame
-        rp = r*np.vstack((np.cos(nu), np.sin(nu), np.zeros(nu.shape[0])))
-
-        # Transform to inertial frame
-        C = np.array([
-            [np.cos(raan)*np.cos(arg_perigee)-np.sin(raan)*np.sin(arg_perigee)*np.cos(i), -np.cos(raan)
-             * np.sin(arg_perigee)-np.sin(raan)*np.cos(arg_perigee)*np.cos(i), np.sin(raan)*np.sin(i)],
-            [np.sin(raan)*np.cos(arg_perigee)+np.cos(raan)*np.sin(arg_perigee)*np.cos(i), -np.sin(raan)
-             * np.sin(arg_perigee)+np.cos(raan)*np.cos(arg_perigee)*np.cos(i), -np.cos(raan)*np.sin(i)],
-            [np.sin(arg_perigee)*np.sin(i),
-             np.cos(arg_perigee)*np.sin(i), np.cos(i)]
-        ])
-
-        return C @ rp
+        return self.get_state_space_point(np.linspace(0, 2*np.pi, n))
 
     def plot(self):
         state_space_orbit = self.get_state_space_orbit(1000)
