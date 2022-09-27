@@ -159,23 +159,27 @@ class KeplerianOrbit:
         mu: float
             gravitational parameter of the central body in meters cubed per second squared.
         '''
-        h = np.cross(r, v)  # angular momentum vector
-        n = np.cross(np.array([0, 0, 1]), h)  # node vector
+        # From Curtis Orbital Mechanics Section 4.3
+        r_norm = np.linalg.norm(r)
+        v_norm = np.linalg.norm(v)
 
-        e_vec = (1/mu)*((np.linalg.norm(v)**2 - mu/np.linalg.norm(r))
-                        * r - (r @ v)*v)  # eccentricity vector
+        v_r = np.dot(r, v)/r_norm
+        h = np.cross(r, v)
 
-        e = np.linalg.norm(e_vec)  # eccentricity
+        h_norm = np.linalg.norm(h)
+        i = np.arccos(h[2]/h_norm)
+        n = np.cross(np.array([0, 0, 1]), h)
+
+        raan = np.arctan2(n[1], n[0])  # this makes it quadrant aware
+
+        e = (1/mu)*((v_norm**2 - mu/r_norm)*r - r_norm*v_r*v)
+
+        arg_perigee = np.arctan2(
+            e[2]/np.sin(i), e[0]*np.cos(raan) + e[1]*np.sin(raan))  # this makes it quadrant aware
+
         # energy (specific mechanical energy)
         energy = (np.linalg.norm(v)**2)/2 - mu/np.linalg.norm(r)
 
         a = -mu/(2*energy)  # semi-major axis
-
-        i = np.arccos(h[2]/np.linalg.norm(h))  # inclination
-        # right ascension of the ascending node
-        raan = np.arccos(n[0]/np.linalg.norm(n))
-        # argument of perigee
-        arg_perigee = np.arccos(
-            (n @ e_vec)/(np.linalg.norm(n)*np.linalg.norm(e_vec)))
 
         return cls(a, np.linalg.norm(e), i, raan, arg_perigee)

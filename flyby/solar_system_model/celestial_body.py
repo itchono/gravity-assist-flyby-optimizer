@@ -28,11 +28,11 @@ class CelestialBody:
     # Real-World Presets
     @classmethod
     def sun(cls):
-        return cls("Sun", 695700000, 1.989e30, 0xffff66, 10)
+        return cls("Sun", 695700000, 1.989e30, 0xffff22, 10)
 
     @classmethod
     def earth(cls):
-        return cls("Earth", 6371000, 5.972e24, 0x0099ff, 3)
+        return cls("Earth", 6371000, 5.972e24, 0x3E93C3, 3)
 
     @classmethod
     def moon(cls):
@@ -48,15 +48,15 @@ class CelestialBody:
 
     @classmethod
     def mars(cls):
-        return cls("Mars", 3389500, 6.39e23, 0xff6600, 4)
+        return cls("Mars", 3389500, 6.39e23, 0x993d00, 4)
 
     @classmethod
     def jupiter(cls):
-        return cls("Jupiter", 69911000, 1.898e27, 0xffcc66, 5)
+        return cls("Jupiter", 69911000, 1.898e27, 0xF5A52E, 5)
 
     @classmethod
     def saturn(cls):
-        return cls("Saturn", 58232000, 5.683e26, 0xfff7e6, 6)
+        return cls("Saturn", 58232000, 5.683e26, 0xEEC554, 6)
 
     @classmethod
     def uranus(cls):
@@ -69,4 +69,4 @@ class CelestialBody:
     # KSP Presets
     @classmethod
     def kerbin(cls):
-        return cls("Kerbin", 600000, 5.2915793e22, 0xCCCCCC)
+        return cls("Kerbin", 600000, 5.2915793e22, 0x3E93C3)
