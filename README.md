@@ -8,4 +8,7 @@ I built my own solar system model using planetary data from JPL Development Ephe
 
 You can run this example by running the following command:
 `
-python -m gravity_assist_flyby_optimizer.examples.solar_system_plot`
+python -m flyby.visualizers.solar_system_plot`
+
+## Time Integration of Spacecraft Dynamics
+I modelled gravity from all major solar system bodies (8 planets + the Sun) acting on a spacecraft. The dynamic simulation is integrated using `scipy.integrate.solve_ivp`.

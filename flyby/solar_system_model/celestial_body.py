@@ -21,6 +21,9 @@ class CelestialBody:
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f"CelestialBody({self.name}, {self.radius}, {self.mass}, {self.color}, {self.ephemeris_id})"
+
     @property
     def mu(self) -> float:
         return self.mass * G

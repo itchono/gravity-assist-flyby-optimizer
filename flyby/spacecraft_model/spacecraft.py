@@ -3,6 +3,7 @@ from flyby.solar_system_model.jpl_ephemeris import de440
 from scipy.spatial.transform import Rotation as R
 from flyby.solar_system_model.celestial_body import CelestialBody
 from flyby.spacecraft_model.gravity import gravity
+from flyby.time_model.julian_day import jd_to_datetime64
 
 
 class Spacecraft:
@@ -106,7 +107,9 @@ class Spacecraft:
         force = np.zeros(3)
         t_jd = self.jd_0 + t/86400
 
+        t_actual = jd_to_datetime64(t_jd)
+
         for body in self.interacting_bodies:
-            force += gravity(u, t_jd, body)
+            force += gravity(u, t_jd, body) * self.mass
 
         return np.concatenate((u[3:], force / self.mass))

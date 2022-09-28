@@ -20,6 +20,17 @@ class RelationalTree:
     def add_child_body(self, child_body: CelestialBody) -> None:
         self.root.add_child_body(child_body)
 
+    @property
+    def all_bodies(self) -> "list[RelationalTreeNode]":
+        # Traverse the tree in a depth-first manner
+        all_bodies: list[RelationalTreeNode] = []
+        stack: list[RelationalTreeNode] = [self.root]
+        while len(stack) > 0:
+            node = stack.pop()
+            all_bodies.append(node)
+            stack.extend(node.children)
+        return all_bodies
+
     @classmethod
     def solar_system(cls):
         tree = cls(CelestialBody.sun())
