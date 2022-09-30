@@ -1,5 +1,5 @@
 from scipy.constants import G
-from scipy.interpolate import interp1d
+from flyby.math_utilities.fast_linear_interpolator import FastLerp
 from flyby.solar_system_model.jpl_ephemeris import de440
 import numpy as np
 
@@ -20,8 +20,8 @@ class CelestialBody:
         self.color: int = color
 
         self.ephemeris_id: int = ephemeris_id
-        self.position_interpolant: interp1d = None
-        self.velocity_interpolant: interp1d = None
+        self.position_interpolant: FastLerp = None
+        self.velocity_interpolant: FastLerp = None
 
     def __str__(self):
         return self.name
@@ -29,7 +29,7 @@ class CelestialBody:
     def __repr__(self):
         return f"CelestialBody({self.name}, {self.radius}, {self.mass}, {self.color}, {self.ephemeris_id})"
 
-    def construct_interpolant(self, start_time: float, end_time: float, n: int = 1000):
+    def construct_interpolant(self, start_time: float, end_time: float):
         '''
         Constructs a scipy.interpolate.interp1d object that interpolates the position and velocity of
         the body at any time between start_time and end_time
@@ -43,15 +43,17 @@ class CelestialBody:
         n : int, optional
             The number of points to use in the interpolation, by default 1000
         '''
+        n = int(end_time - start_time) * 10  # 10 steps per day
+
         t_jd = np.linspace(start_time, end_time, n)
 
         position_arr, velocity_arr = de440[0, self.ephemeris_id].compute_and_differentiate(
             t_jd)
 
-        self.position_interpolant = interp1d(
-            t_jd, position_arr, kind='cubic', assume_sorted=True)
-        self.velocity_interpolant = interp1d(
-            t_jd, velocity_arr, kind='cubic', assume_sorted=True)
+        self.position_interpolant = FastLerp(
+            t_jd, position_arr * 1e3)
+        self.velocity_interpolant = FastLerp(
+            t_jd, velocity_arr * 1e3 / 86400)
 
     def get_position(self, time: float) -> np.ndarray:
         '''
@@ -70,7 +72,7 @@ class CelestialBody:
         if self.position_interpolant is None:
             raise Exception(
                 "Interpolant has not been constructed for this body")
-        return self.position_interpolant(time) * 1e3
+        return self.position_interpolant(time)
 
     def get_velocity(self, time: float) -> np.ndarray:
         '''
@@ -89,7 +91,7 @@ class CelestialBody:
         if self.velocity_interpolant is None:
             raise Exception(
                 "Interpolant has not been constructed for this body")
-        return self.velocity_interpolant(time) * 1e3 / 86400
+        return self.velocity_interpolant(time)
 
     @property
     def mu(self) -> float:

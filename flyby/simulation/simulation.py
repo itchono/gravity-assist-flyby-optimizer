@@ -1,6 +1,9 @@
 from scipy.integrate import solve_ivp
 import numpy as np
 from matplotlib import pyplot as plt
+from tqdm import tqdm
+
+import cProfile
 
 from flyby.orbit_models.keplerian_orbit import KeplerianOrbit
 from flyby.solar_system_model.celestial_body import CelestialBody
@@ -47,7 +50,7 @@ def generate_initial_conditions_from_cartesian(initial_state: np.ndarray,
     return spacecraft
 
 
-def simulate(spacecraft: Spacecraft, end_time: np.datetime64):
+def simulate(spacecraft: Spacecraft, end_time: np.datetime64, show_progress=True):
     end_jd = datetime64_to_jd(end_time)
 
     # Build ephemeris interpolants
@@ -56,8 +59,20 @@ def simulate(spacecraft: Spacecraft, end_time: np.datetime64):
 
     duration_seconds = (end_jd - spacecraft.jd_0) * 86400
 
+    if show_progress:
+        pbar = tqdm(total=int(duration_seconds), unit="sec",
+                    desc=f"Propagating from JD {round(spacecraft.jd_0, 2)} to {round(end_jd, 2)}")
+
+    def progress(t, y):
+        pbar.update(int(t - pbar.n))
+        return 0
+
     sol = solve_ivp(spacecraft.get_rates, (0, duration_seconds),
-                    spacecraft.initial_state_icrs, method='DOP853', rtol=1e-10, atol=1e-10)
+                    spacecraft.initial_state_icrs, method='DOP853', rtol=1e-8, atol=1e-8,
+                    events=[progress] if show_progress else None)
+
+    if show_progress:
+        pbar.close()
 
     return sol
 
@@ -92,8 +107,8 @@ def earth_orbit_example():
     plt.show()
 
 
-def earth_escape_example():
-    initial_state = np.array([7000e3, 0, 0, 0, 11.2e3, 0])  # escape velocity
+def earth_escape_example(show_progress=True):
+    initial_state = np.array([7000e3, 0, 0, 0, 10.9e3, 0])  # escape velocity
 
     parent_body = CelestialBody.earth()
     initial_time = np.datetime64('now')
@@ -102,14 +117,13 @@ def earth_escape_example():
         initial_state, parent_body, initial_time)
 
     solution = simulate(spacecraft, np.datetime64(
-        'now') + np.timedelta64(700, 'D'))
+        'now') + np.timedelta64(700, 'D'), show_progress)
 
     jd = spacecraft.jd_0 + solution.t / 86400
 
     plt.style.use('dark_background')
 
     plt.subplot(121)
-
     # At departure
     full_solar_system_plot(plt.gca(), jd_to_datetime64(jd[0]))
     plot_trajectory(solution.y[:3], plt.gca(), jd, color="white")
@@ -124,5 +138,7 @@ def earth_escape_example():
 
 
 if __name__ == '__main__':
-    # earth_orbit_example()
+    earth_orbit_example()
+
+    # cProfile.run('earth_escape_example(False)')
     earth_escape_example()

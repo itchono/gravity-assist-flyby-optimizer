@@ -108,9 +108,6 @@ class Spacecraft:
         force = np.zeros(3)
         t_jd = self.jd_0 + t/86400
 
-        t_actual = jd_to_datetime64(t_jd)
-        print("Doing step for time", t_actual)
-
         for body in self.interacting_bodies:
             force += gravity(u, t_jd, body) * self.mass
 
