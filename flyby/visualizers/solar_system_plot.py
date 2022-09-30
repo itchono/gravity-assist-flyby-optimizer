@@ -52,7 +52,8 @@ def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
             color=f"#{body.color:X}", label=body.name)
 
 
-def full_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("now")):
+def full_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("now"),
+                           show_legend: bool = False):
     '''
     Generates a plot of the solar system at the specified time,
     defaulting to the current time if unspecified.
@@ -63,6 +64,8 @@ def full_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("no
         The axes on which to plot the solar system.
     time: np.datetime64
         The time at which to generate the plot.
+    show_legend: bool
+        Whether to show the legend.
     '''
     jd = datetime64_to_jd(time)
     solar_system = RelationalTree.solar_system()
@@ -81,10 +84,13 @@ def full_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("no
         f'Solar System at {time}\nBarycentric Ecliptic Frame', wrap=True)
     ax.set_axis_off()
     ax.set_aspect('equal')
-    ax.legend()
+
+    if show_legend:
+        ax.legend()
 
 
-def inner_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("now")):
+def inner_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("now"),
+                            show_legend: bool = False):
     '''
     Generates a plot of the inner (4 planets) solar system at the specified time,
     defaulting to the current time if unspecified.
@@ -95,6 +101,8 @@ def inner_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("n
         The axes on which to plot the solar system.
     time: np.datetime64
         The time at which to generate the plot.
+    show_legend: bool
+        Whether to show the legend.
     '''
 
     jd = datetime64_to_jd(time)
@@ -114,7 +122,9 @@ def inner_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("n
         f'Inner Solar System at {time}\nBarycentric Ecliptic Frame', wrap=True)
     ax.set_axis_off()
     ax.set_aspect('equal')
-    ax.legend()
+
+    if show_legend:
+        ax.legend()
 
 
 def zoom_axes_to_body(ax: plt.Axes, body: CelestialBody, jd: float, zoom: float = 10,
@@ -149,8 +159,8 @@ if __name__ == "__main__":
     plt.style.use('dark_background')  # dark mode
     plt.figure(figsize=(12, 7))
     plt.subplot(121)
-    full_solar_system_plot(plt.gca())
+    full_solar_system_plot(plt.gca(), show_legend=True)
     plt.subplot(122)
-    inner_solar_system_plot(plt.gca())
+    inner_solar_system_plot(plt.gca(), show_legend=True)
 
     plt.show()

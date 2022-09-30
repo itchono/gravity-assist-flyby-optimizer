@@ -1,4 +1,7 @@
 from scipy.constants import G
+from scipy.interpolate import interp1d
+from flyby.solar_system_model.jpl_ephemeris import de440
+import numpy as np
 
 
 class CelestialBody:
@@ -17,12 +20,76 @@ class CelestialBody:
         self.color: int = color
 
         self.ephemeris_id: int = ephemeris_id
+        self.position_interpolant: interp1d = None
+        self.velocity_interpolant: interp1d = None
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return f"CelestialBody({self.name}, {self.radius}, {self.mass}, {self.color}, {self.ephemeris_id})"
+
+    def construct_interpolant(self, start_time: float, end_time: float, n: int = 1000):
+        '''
+        Constructs a scipy.interpolate.interp1d object that interpolates the position and velocity of
+        the body at any time between start_time and end_time
+
+        Parameters
+        ----------
+        start_time : float
+            The start time of the interpolation in Julian days
+        end_time : float
+            The end time of the interpolation in Julian days
+        n : int, optional
+            The number of points to use in the interpolation, by default 1000
+        '''
+        t_jd = np.linspace(start_time, end_time, n)
+
+        position_arr, velocity_arr = de440[0, self.ephemeris_id].compute_and_differentiate(
+            t_jd)
+
+        self.position_interpolant = interp1d(
+            t_jd, position_arr, kind='cubic', assume_sorted=True)
+        self.velocity_interpolant = interp1d(
+            t_jd, velocity_arr, kind='cubic', assume_sorted=True)
+
+    def get_position(self, time: float) -> np.ndarray:
+        '''
+        Returns the position of the body at the specified time in m [ICRS]
+
+        Parameters
+        ----------
+        time : float
+            The time at which to get the position of the body in Julian days
+
+        Returns
+        -------
+        np.ndarray
+            The position of the body at the specified time in the ICRS frame
+        '''
+        if self.position_interpolant is None:
+            raise Exception(
+                "Interpolant has not been constructed for this body")
+        return self.position_interpolant(time) * 1e3
+
+    def get_velocity(self, time: float) -> np.ndarray:
+        '''
+        Returns the velocity of the body at the specified time in m/s [ICRS]
+
+        Parameters
+        ----------
+        time : float
+            The time at which to get the velocity of the body in Julian days
+
+        Returns
+        -------
+        np.ndarray
+            The velocity of the body at the specified time in the ICRS frame
+        '''
+        if self.velocity_interpolant is None:
+            raise Exception(
+                "Interpolant has not been constructed for this body")
+        return self.velocity_interpolant(time) * 1e3 / 86400
 
     @property
     def mu(self) -> float:

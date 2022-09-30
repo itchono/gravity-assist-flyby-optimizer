@@ -24,15 +24,15 @@ class Spacecraft:
 
         self.interacting_bodies: "list[CelestialBody]" = []
 
-    def state_planet(self, ephemeris_id: int, jd: float):
+    def state_planet(self, body: CelestialBody, jd: float):
         '''
         Returns the state of the spacecraft relative to the planet with the
         given ephemeris ID at the given Julian date.
         '''
-        r, v = de440[0, ephemeris_id].compute_and_differentiate(jd)
-        # note: jplephem gives r in km and v in km/day
+        r = body.get_position(jd)
+        v = body.get_velocity(jd)
 
-        return self.state_icrs - np.concatenate((r*1e3, v*1e3/86400))
+        return self.state_icrs - np.concatenate((r, v))
 
     def add_interacting_bodies(self, *bodies: "list[CelestialBody]"):
         '''
@@ -41,7 +41,7 @@ class Spacecraft:
         '''
         self.interacting_bodies.extend(bodies)
 
-    def orbital_frame_rel_planet(self, ephemeris_id: int, jd: float, u: np.ndarray) -> R:
+    def orbital_frame_rel_planet(self, body: CelestialBody, jd: float, u: np.ndarray) -> R:
         '''
         Returns a rotation describing the following directions in the orbital
         frame of the planet with the given ephemeris ID at the given Julian
@@ -61,10 +61,11 @@ class Spacecraft:
         u : np.ndarray
             The state of the spacecraft in the ICRS frame.
         '''
-        r, v = de440[0, ephemeris_id].compute_and_differentiate(jd)
+        r = body.get_position(jd)
+        v = body.get_velocity(jd)
 
-        r_rel = u[:3] - r*1e3
-        v_rel = u[3:] - v*1e3/86400
+        r_rel = u[:3] - r
+        v_rel = u[3:] - v
 
         # Compute the orbital frame
         x = v_rel / np.linalg.norm(v_rel)
@@ -108,6 +109,7 @@ class Spacecraft:
         t_jd = self.jd_0 + t/86400
 
         t_actual = jd_to_datetime64(t_jd)
+        print("Doing step for time", t_actual)
 
         for body in self.interacting_bodies:
             force += gravity(u, t_jd, body) * self.mass

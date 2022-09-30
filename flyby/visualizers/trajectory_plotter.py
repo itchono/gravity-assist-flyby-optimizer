@@ -28,7 +28,7 @@ def plot_trajectory_about_body(body: CelestialBody, position: np.ndarray, jd: np
     ax.plot(r_rel[0], r_rel[1], r_rel[2])
 
 
-def plot_trajectory(r: np.ndarray, ax: plt.Axes, jd: np.ndarray,
+def plot_trajectory(r: np.ndarray, ax: plt.Axes, jd: np.ndarray = None,
                     color: str = "orange",
                     convert_to_ecliptic: bool = True,
                     rel_body: CelestialBody = None) -> None:
@@ -63,3 +63,19 @@ def plot_trajectory(r: np.ndarray, ax: plt.Axes, jd: np.ndarray,
             "jd must be specified if convert_to_ecliptic is True.")
 
     ax.plot(r[0], r[1], color=color)
+
+
+def plot_point(r: np.ndarray, ax: plt.Axes, jd: np.ndarray = None,
+               color: str = "orange",
+               convert_to_ecliptic: bool = True) -> None:
+    '''
+    Puts a marker at position r.
+    '''
+    if convert_to_ecliptic and jd is not None:
+        C = ecliptic_from_J2000(jd[0])
+        r = C @ r
+    elif convert_to_ecliptic and jd is None:
+        raise ValueError(
+            "jd must be specified if convert_to_ecliptic is True.")
+
+    ax.plot(r[0], r[1], "o", color=color)

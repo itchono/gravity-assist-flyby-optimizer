@@ -18,7 +18,7 @@ def gravity(icrs_state: np.ndarray, t_jd: float, body: CelestialBody):
     body : CelestialBody
         The body to compute the acceleration from.
     '''
-    r_body = de440[0, body.ephemeris_id].compute(t_jd) * 1e3
+    r_body = body.get_position(t_jd)
 
     r_rel = icrs_state[:3] - r_body
 
