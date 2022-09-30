@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+from matplotlib.artist import Artist
 import numpy as np
 from flyby.solar_system_model.celestial_body import CelestialBody
 from flyby.solar_system_model.jpl_ephemeris import de440
@@ -9,7 +10,8 @@ from flyby.solar_system_model.relational_tree import RelationalTree
 
 
 def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
-              plot_orbit: bool = True, frame: str = "ecliptic") -> None:
+              plot_orbit: bool = True, frame: str = "ecliptic",
+              num_ellipse_samples: int = 1000) -> "tuple(Artist)":
     '''
     Plots a celestial body on a matplotlib axes object.
 
@@ -30,6 +32,8 @@ def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
     frame: str
         The frame in which to plot the body.
         [ecliptic, J2000]
+    num_ellipse_samples: int
+        The number of samples to use when plotting the orbit ellipse.
     '''
     r, v = de440[0, body.ephemeris_id].compute_and_differentiate(jd)
 
@@ -44,12 +48,16 @@ def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
     orbit = KeplerianOrbit.from_state(
         r, v/86400, mu)
 
-    orbit_r = orbit.get_state_space_orbit(1000)
+    orbit_r = orbit.get_state_space_orbit(num_ellipse_samples)
+
+    marker, = ax.plot(r[0], r[1], 'o', markersize=5,
+                      color=f"#{body.color:X}", label=body.name)
 
     if plot_orbit:
-        ax.plot(orbit_r[0], orbit_r[1], color=f"#{body.color:X}")
-    ax.plot(r[0], r[1], 'o', markersize=5,
-            color=f"#{body.color:X}", label=body.name)
+        path, = ax.plot(orbit_r[0], orbit_r[1], color=f"#{body.color:X}")
+        return marker, path
+    else:
+        return marker
 
 
 def full_solar_system_plot(ax: plt.Axes, time: np.datetime64 = np.datetime64("now"),

@@ -1,3 +1,4 @@
 jplephem
 scipy
 matplotlib
+tqdm
