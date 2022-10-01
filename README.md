@@ -12,3 +12,20 @@ python -m flyby.visualizers.solar_system_plot`
 
 ## Time Integration of Spacecraft Dynamics
 I modelled gravity from all major solar system bodies (8 planets + the Sun) acting on a spacecraft. The dynamic simulation is integrated using `scipy.integrate.solve_ivp`.
+
+# Dependencies
+## C++
+### [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)
+Install on debian-based systems:
+`sudo apt-get install libeigen3-dev`
+
+## General
+### DE440 Ephemerides
+Download from [JPL SSD](https://ssd.jpl.nasa.gov/ftp/eph/planets/Linux/de440/). Place the file into the root directory of the project.
+
+e.g. `wget https://ssd.jpl.nasa.gov/ftp/eph/planets/Linux/de440/linux_p1550p2650.440`
+
+# Installation
+Once you have the dependencies installed, you can install the project by running the following command:
+
+`pip install git+https://github.com/itchono/gravity-assist-flyby-optimizer.git`

@@ -1,0 +1,6 @@
+[submodule "jpl_eph"]
+	path = flyby/cpp_models/jpl_eph
+	url = https://github.com/Bill-Gray/jpl_eph
+[submodule "flyby/cpp_models/lunar"]
+	path = flyby/cpp_models/lunar
+	url = https://github.com/Bill-Gray/lunar
