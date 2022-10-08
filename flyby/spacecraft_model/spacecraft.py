@@ -24,6 +24,10 @@ class Spacecraft:
 
         self.interacting_bodies: "list[CelestialBody]" = []
 
+    @property
+    def interacting_bodies_dict(self):
+        return {body.name: body for body in self.interacting_bodies}
+
     def state_planet(self, body: CelestialBody, jd: float):
         '''
         Returns the state of the spacecraft relative to the planet with the
@@ -73,7 +77,7 @@ class Spacecraft:
         z = np.cross(x, y)
 
         # Convert to a rotation
-        return R.from_matrix(np.array([x, y, z]).T)
+        return np.array([x, y, z]).T
 
     @classmethod
     def from_planet(cls, u: np.ndarray, ephemeris_id: int, jd: float):

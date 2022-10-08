@@ -57,6 +57,14 @@ def simulate(spacecraft: Spacecraft, end_time: np.datetime64, show_progress=True
     for body in spacecraft.interacting_bodies:
         body.construct_interpolant(spacecraft.jd_0, end_jd)
 
+    prograde_direction = spacecraft.orbital_frame_rel_planet(
+        spacecraft.interacting_bodies_dict["Earth"], spacecraft.jd_0,
+        spacecraft.initial_state_icrs).T[0]
+
+    print(prograde_direction)
+
+    spacecraft.initial_state_icrs[3:6] += 4000 * prograde_direction
+
     duration_seconds = (end_jd - spacecraft.jd_0) * 86400
 
     if show_progress:
@@ -82,7 +90,7 @@ def earth_orbit_example():
 
     plt.style.use('dark_background')
 
-    initial_orbit = KeplerianOrbit(7000e3, 0.01, 0, 0, 0)
+    initial_orbit = KeplerianOrbit(7000e3, 0.01, 0.01, 0, 0)
     parent_body = CelestialBody.earth()
     initial_time = np.datetime64('now')
 
@@ -108,16 +116,17 @@ def earth_orbit_example():
 
 
 def earth_escape_example(show_progress=True):
-    initial_state = np.array([7000e3, 0, 0, 0, 10.9e3, 0])  # escape velocity
+    initial_orbit = KeplerianOrbit(7000e3, 0.01, 0, 0, 0)
 
     parent_body = CelestialBody.earth()
     initial_time = np.datetime64('now')
+    initial_ta = np.array([-np.pi/2])
 
-    spacecraft = generate_initial_conditions_from_cartesian(
-        initial_state, parent_body, initial_time)
+    spacecraft = generate_initial_conditions_from_keplerian(
+        initial_orbit, parent_body, initial_time, initial_ta)
 
     solution = simulate(spacecraft, np.datetime64(
-        'now') + np.timedelta64(700, 'D'), show_progress)
+        'now') + np.timedelta64(100, 'D'), show_progress)
 
     jd = spacecraft.jd_0 + solution.t / 86400
 
@@ -138,7 +147,7 @@ def earth_escape_example(show_progress=True):
 
 
 if __name__ == '__main__':
-    earth_orbit_example()
+    # earth_orbit_example()
 
     # cProfile.run('earth_escape_example(False)')
     earth_escape_example()
