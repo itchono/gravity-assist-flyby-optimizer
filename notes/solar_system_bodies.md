@@ -16,4 +16,4 @@
 * Sol
 
 # Position Determination
-Planetary body positions are obtained from the DE440 JPL ephemeris. The ephemeris is a set of 3D position and velocity vectors for the planets and the sun. The vectors are given in the ICRS coordinate system. The vectors are given at a set of discrete times. The vectors are interpolated to obtain the position at any time.
+Planetary body positions are obtained from the DE440 JPL ephemeris. The ephemeris is a set of 3D position and velocity vectors for the planets and the sun. The ephemeris yields position vectors in the J2000 barycentric frame. Note that J2000 is aligned with Earth's axial tilt, and is therefore about 23.5 degrees rotated from the solar system ecliptic.
