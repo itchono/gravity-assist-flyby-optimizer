@@ -11,7 +11,8 @@ from flyby.solar_system_model.relational_tree import RelationalTree
 
 def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
               plot_orbit: bool = True, frame: str = "ecliptic",
-              num_ellipse_samples: int = 1000) -> "tuple(Artist)":
+              num_ellipse_samples: int = 1000,
+              markersize: int = 5) -> "tuple(Artist)":
     '''
     Plots a celestial body on a matplotlib axes object.
 
@@ -50,7 +51,7 @@ def plot_body(body: CelestialBody, jd: float, ax: plt.Axes, mu: float,
 
     orbit_r = orbit.get_state_space_orbit(num_ellipse_samples)
 
-    marker, = ax.plot(r[0], r[1], 'o', markersize=5,
+    marker, = ax.plot(r[0], r[1], 'o', markersize=markersize,
                       color=f"#{body.color:X}", label=body.name)
 
     if plot_orbit:
